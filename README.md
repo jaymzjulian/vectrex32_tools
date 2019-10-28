@@ -8,3 +8,5 @@ Usage: `obj-to-vx32 [configuration-file] [object-file] [object-name]`
 Example: `obj-to-vx32 standard-configuration.py lightcycle-low.kob lightcycle`
 
 Note that intensities dont yet work, but will soon ;).  Also, only tris or quads
+
+Configuration file: See standard-config.py for example and descriptions of options
