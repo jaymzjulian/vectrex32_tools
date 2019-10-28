@@ -75,6 +75,17 @@ while len(lines)>0:
   if 0==0:
     if line_seg == None:
       line_seg = lines[0]
+      # choose the closest item, in an attempt to avoid pen drift!  Instead, right now we're just choosing
+      # an arbitary one...
+      min_d = 99999.0
+      for l in lines:
+        my_d = 0
+        for c in range(3):
+          my_d += (points[l[0]][c]-points[lastpoint][c])**2
+        if my_d < min_d:
+          line_seg = l
+          min_d = my_d
+      # shove things into holding places
       l = line_seg
       actual_l = l
       print "  {MoveTo,%f,%f,%f}," % (points[l[0]][0], points[l[0]][1], points[l[0]][2]),
