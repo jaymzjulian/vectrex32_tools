@@ -23,7 +23,7 @@ for line in f:
       z=(float(parts[2])+float(zoffset))*float(zscale*scale)
       points.append([float(x),float(y),float(z)])
     elif parts[0] == 'f':
-      for c in range(3):
+      for c in range(len(parts)-1):
         lines.append([int(parts[1+c].split('/')[0])-1 , int(parts[1+((c+1)%3)].split('/')[0])-1, current_i])
       #print " {MoveTo, %d,%d,%d}, _ " % (int(tripoints[0][0]), int(tripoints[0][1]), int(tripoints[0][2]))
       #for c in range(3):
