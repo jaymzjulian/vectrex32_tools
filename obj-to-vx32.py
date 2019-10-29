@@ -11,6 +11,7 @@ f = open(sys.argv[2]).readlines()
 execfile(sys.argv[1])
 
 lines = []
+surfaces = []
 current_i = 1.0
 ignoring = False
 
@@ -24,8 +25,10 @@ for line in f:
       points.append([float(x),float(y),float(z)])
     elif parts[0] == 'f':
       if not ignoring:
+        my_surface = []
         for c in range(len(parts)-1):
-          lines.append([int(parts[1+c].split('/')[0])-1 , int(parts[1+((c+1)%3)].split('/')[0])-1])
+          my_surface.append(int(parts[1+c].split('/')[0])-1)
+        surfaces.append(my_surface)
       #print " {MoveTo, %d,%d,%d}, _ " % (int(tripoints[0][0]), int(tripoints[0][1]), int(tripoints[0][2]))
       #for c in range(3):
       #  lines.append([int(tripoints[(c)%3][0]), int(tripoints[(c+1)%3][0])])
@@ -35,6 +38,43 @@ for line in f:
         ignoring = True
       else:
         ignoring = False
+
+# Find any obvious quads via a terrible, terribly slow algorythm
+# What we're looking for here, is surfaces which share a common
+# line between them - i.e. not just a point, but an entire line, which
+# is also oriented the same way.  We can then assume that that line is
+# superflous...
+if simple_quad_detect:
+  found_quads = True
+  while found_quads:
+    found_quads = False
+    for s1 in surfaces:
+      for s2 in surfaces:
+        if (not found_quads) and s1!=s2 and len(s1)==3 and len(s2)==3 and len(set(s1))==3 and len(set(s2))==3:  
+          for c1 in range(3):
+            for c2 in range(3):
+              if s1[c1] == s2[c2] and (s1[(c1+1)%3] == s2[(c2+1)%3] or s1[(c1+1)%3] == s2[(c2-1)%3]):
+                # Find all of our line segments
+                my_lines = []
+                for ql in range(3):
+                  if ql!=c1:
+                    my_lines.append([s1[ql], s1[(ql+1)%3]])
+                for ql in range(3):
+                  if (((s1[(c1+1)%3] == s2[(c2+1)%3]) and ql!=c2) or
+                     ((s1[(c1+1)%3] == s2[(c2-1)%3]) and ql!=((c2-1)%3))):
+                    my_lines.append([s2[ql], s2[(ql+1)%3]])
+                #print s1,s2,"is a quad of ",my_lines
+                surfaces.remove(s1)
+                surfaces.remove(s2)
+                # Just output them straight to the line list, rather than trying to
+                # turn them back into a poly!
+                lines+=my_lines
+                found_quads = True
+
+# Turn the remaining surfaces into lines
+for s in surfaces:
+  for c in range(len(s)):
+    lines.append([s[c], s[(c+1)%len(s)]])
 
 # first remove dupes from lines
 # both dupe lines and empty draws

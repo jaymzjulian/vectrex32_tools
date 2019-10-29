@@ -13,6 +13,10 @@ xscale = 1
 yscale = 1
 zscale = 1
 
+# Should we try and turn triangles into quads?
+# Our algo for this is _incredibly_ simple though, and relies on "well behaved" triangles ;)
+simple_quad_detect = True
+
 # Should we map materials to intensities?
 # This isn't actually implemented yet, since it needs code
 # on the 
