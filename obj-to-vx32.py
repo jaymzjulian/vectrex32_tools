@@ -1,5 +1,5 @@
 #!/usr/bin/python
-import sys
+import sys,math
 
 if len(sys.argv) < 3:
   print "Usage:",sys.argv[0],"[configuration-file] [object-file] [object-name]"
@@ -76,13 +76,19 @@ for s in surfaces:
   for c in range(len(s)):
     lines.append([s[c], s[(c+1)%len(s)]])
 
+
 # first remove dupes from lines
 # both dupe lines and empty draws
 nl = []
 lines = sorted(lines)
 ll=[0,0]
 for l in lines:
-  if ll!=l:
+  # also cull too short lines
+  lx = points[l[0]][0] - points[l[1]][0]
+  ly = points[l[0]][1] - points[l[1]][1]
+  lz = points[l[0]][1] - points[l[1]][1]
+  llength = math.sqrt(lx*lx+ly*ly+lz*lz)
+  if llength > min_line_length and ll!=l:
     if [points[l[0]][0], points[l[0]][1], points[l[0]][2]] != [points[l[1]][0], points[l[1]][1], points[l[1]][2]]:
       nl.append(l)
   ll = l
@@ -128,7 +134,8 @@ while len(lines)>0:
       # shove things into holding places
       l = line_seg
       actual_l = l
-      print "  {MoveTo,%f,%f,%f}," % (points[l[0]][0], points[l[0]][1], points[l[0]][2]),
+      if min_d > min_move:
+        print "  {MoveTo,%f,%f,%f}," % (points[l[0]][0], points[l[0]][1], points[l[0]][2]),
     print "  {DrawTo, %f,%f,%f}" % (points[l[1]][0], points[l[1]][1], points[l[1]][2]),
   last_draw_command = [points[l[0]][0], points[l[0]][1], points[l[0]][2], points[l[1]][0], points[l[1]][1], points[l[1]][2]]
   lastpoint = l[1]
