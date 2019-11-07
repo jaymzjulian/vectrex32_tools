@@ -99,6 +99,7 @@ lastpoint = -1
 last_draw_command = None
 print "function "+sys.argv[3]+"()"
 print "mysprite={ _"
+first_move = True
 while len(lines)>0:
   # Try and find something that matches the end of the last endpoint
   line_seg = None
@@ -134,7 +135,8 @@ while len(lines)>0:
       # shove things into holding places
       l = line_seg
       actual_l = l
-      if min_d > min_move:
+      if min_d >= min_move or first_move:
+        first_move = False
         print "  {MoveTo,%f,%f,%f}," % (points[l[0]][0], points[l[0]][1], points[l[0]][2]),
     print "  {DrawTo, %f,%f,%f}" % (points[l[1]][0], points[l[1]][1], points[l[1]][2]),
   last_draw_command = [points[l[0]][0], points[l[0]][1], points[l[0]][2], points[l[1]][0], points[l[1]][1], points[l[1]][2]]
