@@ -13,6 +13,7 @@ execfile(sys.argv[1])
 lines = []
 surfaces = []
 current_i = 1.0
+round_digits = 3
 ignoring = False
 
 print >> sys.stderr, "'loading obj data...."
@@ -38,7 +39,18 @@ for line in f:
       if parts[1].strip() in ignore_materials:
         ignoring = True
       else:
-        ignoring = False
+        ignoring  = False
+
+
+for j in range(len(points)):
+  for k in range(len(points)):
+    if j!=k:
+      differ = False
+      for c in range(3):
+        if round(points[j][c], round_digits) != round(points[k][c], round_digits):
+           differ = True
+      if not differ:
+        print >>sys.stderr, "Points",points[j],"are the same as",points[k],"currently we dont dedupe this, but we should!"
 
 # Find any obvious quads via a terrible, terribly slow algorythm
 # What we're looking for here, is surfaces which share a common
@@ -94,7 +106,14 @@ for l in lines:
   llength = math.sqrt(lx*lx+ly*ly+lz*lz)
   if llength > min_line_length and ll!=l:
     if [points[l[0]][0], points[l[0]][1], points[l[0]][2]] != [points[l[1]][0], points[l[1]][1], points[l[1]][2]]:
-      nl.append(l)
+      dupe = False
+      for ol in nl:
+        if sorted(ol) == sorted(l):
+          dupe = True
+      if dupe:
+        print >>sys.stderr, "Eliminated",l,"due to match in draw list!"
+      else:
+        nl.append(l)
     else:
       print >>sys.stderr, "Eliminated",l,"due to previous point being identical"
   else:
