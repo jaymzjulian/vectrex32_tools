@@ -15,6 +15,7 @@ surfaces = []
 current_i = 1.0
 ignoring = False
 
+print >> sys.stderr, "'loading obj data...."
 for line in f:
   parts=line.split()
   if len(parts) > 0:
@@ -45,6 +46,7 @@ for line in f:
 # is also oriented the same way.  We can then assume that that line is
 # superflous...
 if simple_quad_detect:
+  print >>sys.stderr, "'detecting quads...."
   found_quads = True
   while found_quads:
     found_quads = False
@@ -72,6 +74,7 @@ if simple_quad_detect:
                 found_quads = True
 
 # Turn the remaining surfaces into lines
+print >>sys.stderr, "Loading surfaces..."
 for s in surfaces:
   for c in range(len(s)):
     lines.append([s[c], s[(c+1)%len(s)]])
@@ -82,17 +85,26 @@ for s in surfaces:
 nl = []
 lines = sorted(lines)
 ll=[0,0]
+print >>sys.stderr, "Eliminating lines.... starting with",len(lines)
 for l in lines:
   # also cull too short lines
   lx = points[l[0]][0] - points[l[1]][0]
   ly = points[l[0]][1] - points[l[1]][1]
-  lz = points[l[0]][1] - points[l[1]][1]
+  lz = points[l[0]][2] - points[l[1]][2]
   llength = math.sqrt(lx*lx+ly*ly+lz*lz)
   if llength > min_line_length and ll!=l:
     if [points[l[0]][0], points[l[0]][1], points[l[0]][2]] != [points[l[1]][0], points[l[1]][1], points[l[1]][2]]:
       nl.append(l)
+    else:
+      print >>sys.stderr, "Eliminated",l,"due to previous point being identical"
+  else:
+    if ll==l:
+      print >>sys.stderr, "Eliminated",l,"due to too dupe with",ll
+    else:
+      print >>sys.stderr, "Eliminated",l,"due to too short at",llength
   ll = l
 lines = nl
+print >>sys.stderr,"... ending with",len(lines)
 
 # Now generate the sprite
 lastpoint = -1
