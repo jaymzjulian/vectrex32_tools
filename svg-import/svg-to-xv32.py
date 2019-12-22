@@ -4,20 +4,26 @@ import sys,os,math
 paths,attributes = svg2paths(sys.argv[1])
  
 # Path types:
-#  Line(self,start,end)  
-#  QuadraticBezier(self,start,control,end) 
-#  CubicBezier(self,start,control1,control2,end) 
-#  Arc(self,start,radius,rotation,large_arc,sweep,end,autoscale_radius=True) 
-#  Path(self,*segments,**kw)
+#  Line(self,start,end) - unsupported
+#  QuadraticBezier(self,start,control,end)  - supported
+#  CubicBezier(self,start,control1,control2,end)  - supported
+#  Arc(self,start,radius,rotation,large_arc,sweep,end,autoscale_radius=True) - unsupported?
 
-# Chunky lines ;)
-beizer_seg_count = 4
-round_digits = 2
-target_size_x = 64
-target_size_y = 64
-acceptable_error = 1.0
+# These are the tunables - this will cause the item to be exactly x * y
+target_size_x = 256
+target_size_y = 256
+# Set target_commands to something super high is you just want to set acceptable_error
+# So if you want "no more than N vectors", set target_coomands and acceptable_error to 0.0
+# 
+# If you want "no more than N error", set target_commands to 0, and acceptable_error to some other value
+target_commands = 256
+acceptable_error = 0.0
 
 v32commands = []
+
+
+# Smooth lines - we'll fix it in post ;)
+beizer_seg_count = 8
 
 lx = -999
 ly = -999
@@ -71,20 +77,49 @@ for v in range(len(v32commands)):
   v32commands[v][2] *= scale_y
 
 # Now clean up any draws which are less than acceptable error
-removed = True
-while removed:
-  removed = False
-  for v in range(len(v32commands)-1):
-    dist_x = v32commands[v][1] - v32commands[v+1][1]
-    dist_y = v32commands[v][2] - v32commands[v+1][2]
-    dist = math.sqrt(dist_x*dist_x + dist_y*dist_y)
-    # Break after this, to ensure we don't corrupt the array...
-    if dist < acceptable_error:
-      removed = True
-      #print "Remove",v+1
-      del(v32commands[v+1])
-      break
+iae = acceptable_error
+while len(v32commands) > target_commands or (target_commands == 0 and iae == acceptable_error):
+  print >>sys.stderr,"Trying error rate of",acceptable_error
+  removed = True
+  while removed:
+    removed = False
+    # Remove over-moves first...
+    for v in range(len(v32commands)-1):
+      if v32commands[v+1][0]=="MoveTo":
+        dist_x = v32commands[v][1] - v32commands[v+1][1]
+        dist_y = v32commands[v][2] - v32commands[v+1][2]
+        dist = math.sqrt(dist_x*dist_x + dist_y*dist_y)
+        if dist < acceptable_error:
+          #print "Remove",v+1
+          removed = True
+          del(v32commands[v+1])
+          break
+    # Having done that, we remove any under-draws which are NOT preceeded by a moveto
+    # This causes us to NOT actually remove any lines, which we were totally doing....
+    if not removed:
+      for v in range(len(v32commands)-1):
+        if v32commands[v][0]=="DrawTo":
+          dist_x = v32commands[v][1] - v32commands[v+1][1]
+          dist_y = v32commands[v][2] - v32commands[v+1][2]
+          dist = math.sqrt(dist_x*dist_x + dist_y*dist_y)
+          # Break after this, to ensure we don't corrupt the array...
+          if dist < acceptable_error:
+            removed = True
+            #print "Remove",v+1
+            del(v32commands[v+1])
+            break
+  print >>sys.stderr,"Vectors:",len(v32commands)
+  acceptable_error += 0.1
 
-print "function ",sys.argv[2]
+print "' final acceptable error:",acceptable_error
+print "' final command count:",len(v32commands)
+print "function ",sys.argv[2]+"()"
+print "  mysprite = { _"
 for v in v32commands:
-  print v
+  if v == v32commands[-1]:
+    print "    {",v[0],",",v[1],",",0-v[2],"} _"
+  else:
+    print "    {",v[0],",",v[1],",",0-v[2],"}, _"
+print "  }"
+print "  return mysprite"
+print "endfunction"
