@@ -9,6 +9,7 @@ target_size_y = 512
 # 
 # If you want "no more than N error", set target_commands to 0, and acceptable_error to some other value
 target_commands = 512
+angle_error = 0.1
 acceptable_error = 0.0
 
 # OUTPUT_TYPE_COMMANDS just outputs a set of commands
