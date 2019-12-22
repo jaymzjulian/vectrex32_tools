@@ -2,23 +2,11 @@ from svgpathtools import *
 import sys,os,math,copy
 
 paths,attributes = svg2paths(sys.argv[1])
+OUTPUT_TYPE_FUNCTION = 1
+OUTPUT_TYPE_COMMANDS = 2
+
+execfile(sys.argv[2])
  
-# Path types:
-#  Line(self,start,end) - unsupported
-#  QuadraticBezier(self,start,control,end)  - supported
-#  CubicBezier(self,start,control1,control2,end)  - supported
-#  Arc(self,start,radius,rotation,large_arc,sweep,end,autoscale_radius=True) - unsupported?
-
-# These are the tunables - this will cause the item to be exactly x * y
-target_size_x = 512
-target_size_y = 512
-# Set target_commands to something super high is you just want to set acceptable_error
-# So if you want "no more than N vectors", set target_coomands and acceptable_error to 0.0
-# 
-# If you want "no more than N error", set target_commands to 0, and acceptable_error to some other value
-target_commands = 384
-acceptable_error = 0.0
-
 partial_commands = []
 
 
@@ -151,13 +139,32 @@ while len(v32commands) > target_commands or (target_commands == 0 and iae == acc
 
 print "' final acceptable error:",acceptable_error
 print "' final command count:",len(v32commands)
-print "function ",sys.argv[2]+"()"
-print "  mysprite = { _"
-for v in v32commands:
-  if v == v32commands[-1]:
-    print "    {",v[0],",",v[1],",",0-v[2],"} _"
-  else:
-    print "    {",v[0],",",v[1],",",0-v[2],"}, _"
-print "  }"
-print "  return mysprite"
-print "endfunction"
+if output_type == OUTPUT_TYPE_FUNCTION:
+  print "function ",sys.argv[3]+"()"
+  print "  mysprite = { _"
+  for v in v32commands:
+    if v == v32commands[-1]:
+      print "    {",v[0],",",v[1],",",0-v[2],"} _"
+    else:
+      print "    {",v[0],",",v[1],",",0-v[2],"}, _"
+  print "  }"
+  print "  return mysprite"
+  print "endfunction"
+else:
+  print "sub ",sys.argv[3]+"()"
+  print "  call LinesSprite({ _"
+  rto_count = 0
+  for v in v32commands:
+    rto_count += 1
+    if v == v32commands[-1] or rto_count == origin_return_commands:
+      print "    {",v[0],",",v[1],",",0-v[2],"} _"
+    else:
+      print "    {",v[0],",",v[1],",",0-v[2],"}, _"
+    if rto_count == origin_return_commands and v!=v32commands[-1]:
+      print "  })"
+      print "  call ReturnToOriginSprite()"
+      print "  call LinesSprite({ _"
+      print "    {MoveTo,",v[1],",",0-v[2],"}, _"
+      rto_count = 0
+  print "  })"
+  print "endsub"

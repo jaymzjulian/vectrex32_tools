@@ -13,9 +13,9 @@ Configuration file: See standard-config.py for example and descriptions of optio
 
 svg-to-vx32
 -----------
-Currently this does not support external configuration, but will soon
+usage `svg-to-vx32 [svgfile] [configuration-file] [object-name]`
 
-usage `svg-to-vx32 [svgfile] [object-name]`
+Example: `svg-to-vx32 spiral.svg simple-config.py spiral`
 
 Also no intensities yet....
 This requires the svgpathtools python module - install it with `pip install svgpathtools`
