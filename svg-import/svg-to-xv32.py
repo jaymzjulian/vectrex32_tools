@@ -20,9 +20,33 @@ for path in paths:
     if is_bezier_segment(item):
       myPath = []
       my_commands = []
+      # Set this to ridiculous values, so that the first
+      # result is always new - then since the saved angle is from this,
+      # we also _always_ get an endpoint...
+      lx = 999
+      ly = 999
+      la = 999
       for i in range(beizer_seg_count):
-        myPath.append(item.point(i/(float(beizer_seg_count)-1)))
+        # get our point, and work out the angle of the line we'd draw
+        p = item.point(i/(float(beizer_seg_count)-1))
+        mx = p.real
+        my = p.imag
+        ang = math.atan2(my-ly, mx-lx)
+        ang_change = abs(la - ang)
+        #print "ang change:",ang_change
+        # if the angle is changing more than our threashold, create a new
+        # point, otherwise adjust the previous one
+        if ang_change < angle_error:
+          myPath[-1] = item.point(i/(float(beizer_seg_count)-1))
+        else:
+          myPath.append(item.point(i/(float(beizer_seg_count)-1)))
+          lx = mx
+          ly = my
+          la = ang
       myPath.append(item.point(1.0))
+      #print len(myPath)
+      #print myPath
+
       # Just always do this for now - we'll clean up the mess later when
       # we scale/clip!
       cmd = ['MoveTo', myPath[0].real, myPath[0].imag]
@@ -35,6 +59,7 @@ for path in paths:
         lx = i.real
         ly = i.imag
       partial_commands.append(my_commands)
+      #sys.exit(1)
     else:
       raise "Don't yet know how to handle "+str(type(item))
 
