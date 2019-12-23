@@ -143,6 +143,8 @@ while len(v32commands) > target_commands or (target_commands == 0 and iae == acc
     #
     # We do this backwards to try and encourage it to remove MoveTo commands before DrawTo commands
     for v in reversed(range(len(v32commands)-1)):
+      if v32commands[v][0] == "MoveTo" and v32commands[v+1][0] == "MoveTo":
+        raise "We created a duplicate MoveTo situation - this should not happen!  Try increasing your angle tollerance..."
       dist_x = v32commands[v][1] - v32commands[v+1][1]
       dist_y = v32commands[v][2] - v32commands[v+1][2]
       dist = math.sqrt(dist_x*dist_x + dist_y*dist_y)
@@ -157,7 +159,6 @@ while len(v32commands) > target_commands or (target_commands == 0 and iae == acc
     removed = False
     for v in reversed(range(len(v32commands)-1)):
       if v32commands[v][0] == "MoveTo" and v32commands[v+1][0] == "MoveTo":
-        #raise "We created a duplicate MoveTo situation - this should not happen!  Try increasing your angle tollerance..."
         removed = True
       del(v32commands[v])
       break
