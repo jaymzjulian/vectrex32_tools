@@ -131,7 +131,9 @@ while removed:
 
 # Now clean up any draws which are less than acceptable error
 iae = acceptable_error
+ov32 = copy.copy(v32commands)
 while len(v32commands) > target_commands or (target_commands == 0 and iae == acceptable_error):
+  v32commands = copy.copy(ov32)
   print >>sys.stderr,"Trying error rate of",acceptable_error
   removed = True
   while removed:
@@ -155,6 +157,7 @@ while len(v32commands) > target_commands or (target_commands == 0 and iae == acc
     removed = False
     for v in reversed(range(len(v32commands)-1)):
       if v32commands[v][0] == "MoveTo" and v32commands[v+1][0] == "MoveTo":
+        #raise "We created a duplicate MoveTo situation - this should not happen!  Try increasing your angle tollerance..."
         removed = True
       del(v32commands[v])
       break
