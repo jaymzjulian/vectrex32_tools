@@ -11,7 +11,7 @@ partial_commands = []
 
 
 # Smooth lines - we'll fix it in post ;)
-beizer_seg_count = 8
+beizer_seg_count = 32
 
 lx = -999
 ly = -999
