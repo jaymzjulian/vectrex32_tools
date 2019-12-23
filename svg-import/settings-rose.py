@@ -11,7 +11,7 @@ target_size_y = 512
 target_commands = 512
 acceptable_error = 0.0
 # This is in radians...
-angle_error = 0.3
+angle_error = 0.01
 
 # OUTPUT_TYPE_COMMANDS just outputs a set of commands
 # OUTPUT_TYPE_FUNCTION outputs a function

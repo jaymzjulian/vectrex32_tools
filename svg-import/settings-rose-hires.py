@@ -10,12 +10,12 @@ target_size_y = 512
 # If you want "no more than N error", set target_commands to 0, and acceptable_error to some other value
 target_commands = 1024
 acceptable_error = 0.0
-angle_error = 0.05
+angle_error = 0.01
 
 # OUTPUT_TYPE_COMMANDS just outputs a set of commands
 # OUTPUT_TYPE_FUNCTION outputs a function
 # The difference is, OUTPUT_TYPE_COMMANDS can call return to origin from time to time, but OUTPUT_TYPE_FUNCTION
 # cannot
 output_type = OUTPUT_TYPE_COMMANDS
-origin_return_commands = 64
+origin_return_commands = 128
 
