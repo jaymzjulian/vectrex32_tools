@@ -10,7 +10,8 @@ target_size_y = 512
 # If you want "no more than N error", set target_commands to 0, and acceptable_error to some other value
 target_commands = 512
 acceptable_error = 0.0
-max_acceptable = 1.0
+#max_acceptable = 1.0
+
 # This is in radians...
 angle_error = 0.01
 

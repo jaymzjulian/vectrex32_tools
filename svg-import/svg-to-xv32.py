@@ -1,4 +1,5 @@
 from svgpathtools import *
+import StringIO
 import sys,os,math,copy
 
 paths,attributes = svg2paths(sys.argv[1])
@@ -232,19 +233,25 @@ while retrying:
       print "endfunction"
     else:
       print "sub ",sys.argv[3]+"()"
-      print "  call LinesSprite({ _"
+      lattice_list = [StringIO.StringIO()]
+      print >>lattice_list[-1], "  call LinesSprite({ _"
       rto_count = 0
       for v in v32commands:
         rto_count += 1
         if v == v32commands[-1] or rto_count == origin_return_commands:
-          print "    {",v[0],",",v[1],",",0-v[2],"} _"
+          print >>lattice_list[-1], "    {",v[0],",",v[1],",",0-v[2],"} _"
         else:
-          print "    {",v[0],",",v[1],",",0-v[2],"}, _"
+          print >>lattice_list[-1], "    {",v[0],",",v[1],",",0-v[2],"}, _"
         if rto_count == origin_return_commands and v!=v32commands[-1]:
-          print "  })"
-          print "  call ReturnToOriginSprite()"
-          print "  call LinesSprite({ _"
-          print "    {MoveTo,",v[1],",",0-v[2],"}, _"
+          print >>lattice_list[-1], "  })"
+          lattice_list.append(StringIO.StringIO())
+          print >>lattice_list[-1], "  call ReturnToOriginSprite()"
+          print >>lattice_list[-1], "  call LinesSprite({ _"
+          print >>lattice_list[-1], "    {MoveTo,",v[1],",",0-v[2],"}, _"
           rto_count = 0
-      print "  })"
+      print >>lattice_list[-1], "  })"
+      for l in lattice_list[0::2]:
+        print l.getvalue()
+      for l in lattice_list[1::2]:
+        print l.getvalue()
       print "endsub"

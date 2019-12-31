@@ -17,5 +17,5 @@ angle_error = 0.01
 # The difference is, OUTPUT_TYPE_COMMANDS can call return to origin from time to time, but OUTPUT_TYPE_FUNCTION
 # cannot
 output_type = OUTPUT_TYPE_COMMANDS
-origin_return_commands = 128
+origin_return_commands = 64
 
