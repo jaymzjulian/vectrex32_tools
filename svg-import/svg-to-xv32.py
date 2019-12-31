@@ -112,6 +112,8 @@ while retrying:
   while len(partial_commands) > 0:
     min_d = 999999
     wc = None
+    forward_best = True
+    # Try forwards
     for w in partial_commands:
       dist_x = w[0][1] - lx
       dist_y = w[0][2] - ly  
@@ -119,10 +121,50 @@ while retrying:
       if min_d > d:
         min_d = d
         wc = w
-    v32commands.extend(wc)
+        forward_best = True
+
+    # Also try backwards....
+    for w in partial_commands:
+      dist_x = w[-1][1] - lx
+      dist_y = w[-1][2] - ly  
+      d = math.sqrt(dist_x*dist_x + dist_y*dist_y)
+      if min_d > d:
+        min_d = d
+        wc = w
+        forward_best = False
+
+    if forward_best == False:
+      v32commands.append(["MoveTo", wc[-1][1], wc[-1][2]])
+      last_was_draw = True
+      # Reverse the list...
+      for q in reversed(range(len(wc)-1)):
+        if last_was_draw:
+          # DrawTo -> DrawTo is always DrawTo
+          if wc[q][0] == "DrawTo":
+            v32commands.append(["DrawTo", wc[q][1], wc[q][2]])
+            last_was_draw = True
+          # DrawTo -> MoveTo becomes a draw - we're at the current pos, and we need
+          # to draw the backwards line
+          elif wc[q][0] == "MoveTo":
+            v32commands.append(["DrawTo", wc[q][1], wc[q][2]])
+            last_was_draw = False
+        else:
+          # MoveTo -> DrawTo is a MoveTo, because we drew it last frame...
+          if wc[q][0] == "MoveTo":
+            v32commands.append(["DrawTo", wc[q][1], wc[q][2]])
+            last_was_draw = True
+          # MoveTo -> MoveTo is always a MoveTo
+          # Also this should never happen....
+          if wc[q][0] == "MoveTo":
+            v32commands.append(["DrawTo", wc[q][1], wc[q][2]])
+            last_was_draw = True
+      lx = wc[0][1]
+      ly = wc[0][2]
+    else:
+      v32commands.extend(wc)
+      lx = wc[-1][1]
+      ly = wc[-1][2]
     partial_commands.remove(wc)
-    lx = wc[-1][1]
-    ly = wc[-1][2]
 
 # Remove any drawto/moveto combos that are zero :)
   removed = True
@@ -155,7 +197,7 @@ while retrying:
         if v32commands[v][0] == "MoveTo" and v32commands[v+1][0] == "MoveTo":
           if angle_error == 0.0:
             angle_error = 0.01
-          new_angle_error = angle_error*2
+          new_angle_error = angle_error*1.5
           print >>sys.stderr, "Need to restart - angle tollernece was too low trying at",new_angle_error,"!"
           retrying = True
           break
@@ -173,6 +215,7 @@ while retrying:
 
   if not retrying:
     print "' final acceptable error:",acceptable_error
+    print "' final angle tollerance:",angle_error
     print "' final command count:",len(v32commands)
     if output_type == OUTPUT_TYPE_FUNCTION:
       print "function ",sys.argv[3]+"()"
