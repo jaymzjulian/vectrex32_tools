@@ -8,6 +8,7 @@ OUTPUT_TYPE_COMMANDS = 2
  
 # Try until we succeeed...
 new_angle_error = 0
+max_acceptable = 999.0
 retrying = True
 while retrying:
   retrying = False
@@ -194,7 +195,8 @@ while retrying:
       #
       # We do this backwards to try and encourage it to remove MoveTo commands before DrawTo commands
       for v in reversed(range(len(v32commands)-1)):
-        if v32commands[v][0] == "MoveTo" and v32commands[v+1][0] == "MoveTo":
+        # If we're in an error state, bail out!
+        if acceptable_error > max_acceptable or (v32commands[v][0] == "MoveTo" and v32commands[v+1][0] == "MoveTo"):
           if angle_error == 0.0:
             angle_error = 0.01
           new_angle_error = angle_error*1.5
