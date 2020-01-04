@@ -3,9 +3,9 @@ import StringIO
 import sys,os,math,copy
 
 paths,attributes = svg2paths(sys.argv[1])
+testout=wsvg(paths=paths, filename="debug.svg")
 OUTPUT_TYPE_FUNCTION = 1
 OUTPUT_TYPE_COMMANDS = 2
-
  
 # Try until we succeeed...
 new_angle_error = 0
@@ -34,9 +34,10 @@ while retrying:
         # Set this to ridiculous values, so that the first
         # result is always new - then since the saved angle is from this,
         # we also _always_ get an endpoint...
-        lx = 999
-        ly = 999
         la = 999
+        myPath.append(item.point(0.0))
+        lx = myPath[-1].real
+        ly = myPath[-1].imag
         for i in range(beizer_seg_count):
           # get our point, and work out the angle of the line we'd draw
           p = item.point(i/(float(beizer_seg_count)-1))
@@ -69,6 +70,9 @@ while retrying:
           my_commands.append(cmd)
           lx = i.real
           ly = i.imag
+        if len(my_commands)==1:
+          print my_commands
+          raise Exception("Generated single MoveTo - this is a bug!")
         partial_commands.append(my_commands)
         #sys.exit(1)
       else:
@@ -181,6 +185,11 @@ while retrying:
           removed = True
           del(v32commands[v+1])
           break
+
+  for v in reversed(range(len(v32commands)-1)):
+     # If we're in an error state, bail out - we can't draw this!
+     if (v32commands[v][0] == "MoveTo" and v32commands[v+1][0] == "MoveTo"):
+      raise Exception("Got double MoveTo way too early - this is a bug!")
 
 # Now clean up any draws which are less than acceptable error
   iae = acceptable_error
