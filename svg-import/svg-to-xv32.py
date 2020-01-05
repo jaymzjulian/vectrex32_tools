@@ -6,10 +6,16 @@ paths,attributes = svg2paths(sys.argv[1])
 testout=wsvg(paths=paths, filename="debug.svg")
 OUTPUT_TYPE_FUNCTION = 1
 OUTPUT_TYPE_COMMANDS = 2
+
+# inputs... overridable in user config files!!
+max_acceptable = 999.0
+yoffset=0
+xoffset=0
+allow_bad_angle = False
  
 # Try until we succeeed...
 new_angle_error = 0
-max_acceptable = 999.0
+
 retrying = True
 while retrying:
   retrying = False
@@ -207,12 +213,17 @@ while retrying:
       for v in reversed(range(len(v32commands)-1)):
         # If we're in an error state, bail out!
         if acceptable_error > max_acceptable or (v32commands[v][0] == "MoveTo" and v32commands[v+1][0] == "MoveTo"):
-          if angle_error == 0.0:
-            angle_error = 0.01
-          new_angle_error = angle_error*1.5
-          print >>sys.stderr, "Need to restart - angle tollernece was too low trying at",new_angle_error,"!"
-          retrying = True
-          break
+          if not allow_bad_angle:
+            if angle_error == 0.0:
+              angle_error = 0.01
+            new_angle_error = angle_error*1.5
+            print >>sys.stderr, "Need to restart - angle tollernece was too low trying at",new_angle_error,"!"
+            retrying = True
+            break
+          else:
+            removed=True
+            del(v32commands[v])
+            break
         dist_x = v32commands[v][1] - v32commands[v+1][1]
         dist_y = v32commands[v][2] - v32commands[v+1][2]
         dist = math.sqrt(dist_x*dist_x + dist_y*dist_y)
@@ -237,9 +248,9 @@ while retrying:
       print "  mysprite = { _"
       for v in v32commands:
         if v == v32commands[-1]:
-          print "    {",v[0],",",v[1],",",0-v[2],"} _"
+          print "    {",v[0],",",v[1]+xoffset,",",yoffset-v[2],"} _"
         else:
-          print "    {",v[0],",",v[1],",",0-v[2],"}, _"
+          print "    {",v[0],",",v[1]+xoffset,",",yoffset-v[2],"}, _"
       print "  }"
       print "  return mysprite"
       print "endfunction"
@@ -251,15 +262,15 @@ while retrying:
       for v in v32commands:
         rto_count += 1
         if v == v32commands[-1] or rto_count == origin_return_commands:
-          print >>lattice_list[-1], "    {",v[0],",",v[1],",",0-v[2],"} _"
+          print >>lattice_list[-1], "    {",v[0],",",v[1]+xoffset,",",yoffset-v[2],"} _"
         else:
-          print >>lattice_list[-1], "    {",v[0],",",v[1],",",0-v[2],"}, _"
+          print >>lattice_list[-1], "    {",v[0],",",v[1]+xoffset,",", yoffset-v[2],"}, _"
         if rto_count == origin_return_commands and v!=v32commands[-1]:
           print >>lattice_list[-1], "  })"
           lattice_list.append(StringIO.StringIO())
           print >>lattice_list[-1], "  call ReturnToOriginSprite()"
           print >>lattice_list[-1], "  call LinesSprite({ _"
-          print >>lattice_list[-1], "    {MoveTo,",v[1],",",0-v[2],"}, _"
+          print >>lattice_list[-1], "    {MoveTo,",v[1]+xoffset,",",yoffset-v[2],"}, _"
           rto_count = 0
       print >>lattice_list[-1], "  })"
       for l in lattice_list[0::2]:

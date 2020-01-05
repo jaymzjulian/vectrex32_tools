@@ -1,5 +1,6 @@
 OUTPUT_TYPE_FUNCTION = 1
 OUTPUT_TYPE_COMMANDS = 2
+OUTPUT_TYPE_MULTISPRITE = 3
  
 # These are the tunables - this will cause the item to be exactly x * y
 target_size_x = 512
