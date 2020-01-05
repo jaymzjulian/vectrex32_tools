@@ -217,6 +217,9 @@ while retrying:
         dist_y = v32commands[v][2] - v32commands[v+1][2]
         dist = math.sqrt(dist_x*dist_x + dist_y*dist_y)
         if dist < acceptable_error:
+          # average the error, to try and compensate and avoid drift
+          v32commands[v][1] = (v32commands[v][1]+v32commands[v+1][1])/2.0
+          v32commands[v][2] = (v32commands[v][2]+v32commands[v+1][2])/2.0
           #print "Remove",v+1
           removed = True
           del(v32commands[v+1])
