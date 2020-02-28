@@ -22,9 +22,12 @@ for line in f:
   if len(parts) > 0:
     if parts[0] == 'v':
       x=(float(parts[1])+float(xoffset))*float(xscale*scale)
-      y=(float(parts[3])+float(yoffset))*float(yscale*scale)
-      z=(float(parts[2])+float(zoffset))*float(zscale*scale)
+      y=(float(parts[2])+float(yoffset))*float(yscale*scale)
+      z=(float(parts[3])+float(zoffset))*float(zscale*scale)
       points.append([float(x),float(y),float(z)])
+    elif parts[0] == 'l':
+      for c in range(len(parts)-2):
+        lines.append([int(parts[1+c]), int(parts[2+c])])
     elif parts[0] == 'f':
       if not ignoring:
         my_surface = []
