@@ -94,3 +94,32 @@ sub explode2d(workobj)
   next
 endsub
 
+sub explode3d(workobj)
+  ' update the time
+  now = GetTickCount()
+  if workobj.time = 0
+    workobj.time = now
+    return
+  endif
+  real_time = (now - workobj.time) / 960.0
+  workobj.time = now
+
+  ' accelerate the verticies
+  for vertex = 1 to Ubound(workobj.dest)
+    ' shift according to acccel*time
+    workobj.dest[vertex, 2] = workobj.dest[vertex, 2] + workobj.accel[vertex, 1] * real_time
+    workobj.dest[vertex, 3] = workobj.dest[vertex, 3] + workobj.accel[vertex, 2] * real_time
+    workobj.dest[vertex, 4] = workobj.dest[vertex, 4] + workobj.accel[vertex, 3] * real_time
+    ' we hit the ground - great!
+    if workobj.dest[vertex, 3] < workobj.ground
+      workobj.dest[vertex,3] = workobj.ground
+      workobj.accel[vertex, 1] = 0
+      workobj.accel[vertex, 2] = 0
+      workobj.accel[vertex, 3] = 0
+    endif
+
+    ' apply gravity 
+    workobj.accel[vertex, 2] = workobj.accel[vertex, 2] - (workobj.gravity * real_time)
+  next
+endsub
+
