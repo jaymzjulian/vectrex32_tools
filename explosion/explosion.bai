@@ -88,6 +88,10 @@ sub explode2d(workobj)
     ' shift according to acccel*time
     dest[vertex, 2] = dest[vertex, 2] + accel[vertex, 1] * real_time
     dest[vertex, 3] = dest[vertex, 3] + accel[vertex, 2] * real_time
+
+    ' apply gravity 
+    accel[vertex, 2] = accel[vertex, 2] - (gravity * real_time)
+
     ' we hit the ground - great!
     if dest[vertex, 3] < ground
       dest[vertex,3] = ground
@@ -95,8 +99,6 @@ sub explode2d(workobj)
       accel[vertex, 2] = 0
     endif
 
-    ' apply gravity 
-    accel[vertex, 2] = accel[vertex, 2] - (gravity * real_time)
   next
 endsub
 
