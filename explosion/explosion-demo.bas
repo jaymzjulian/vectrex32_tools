@@ -11,7 +11,7 @@ rose_object = rose()
 ' prepare the object for exploding - just expanding variables here for clarity :)
 world_scale = 40
 x_impulse = 2.5
-y_impulse = 5.0
+y_impulse = 2.5
 x_random = 2.5
 y_random = 5.0
 rose_explosion = prepare_explosion(2, rose_object, world_scale, {0,-400}, {x_impulse, y_impulse}, {x_random, y_random}, 9.8, -400, false)
