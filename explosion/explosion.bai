@@ -23,12 +23,12 @@ function prepare_explosion(dimensions, obj, world_scale, point, impulse, random,
     work_object = DeepCopy(obj)
   endif
   ' set up the acceleration table here for now
-  dim work_accel[Ubound(work_object), 2]
+  dim work_accel[Ubound(work_object), dimensions]
   for vertex = 1 to Ubound(work_object)
     if dimensions = 2
       my_vector = {work_object[vertex, 2]-point[1], work_object[vertex, 3]-point[2]}
     else
-      my_vector = {work_object[vertex, 2]-point[1], work_object[vertex, 3]-point[2],  work_object[vertex, 4]-point[4]}
+      my_vector = {work_object[vertex, 2]-point[1], work_object[vertex, 3]-point[2],  work_object[vertex, 4]-point[3]}
     endif
     my_vector = my_vector / norm(my_vector)
     my_vector = my_vector * world_scale
@@ -98,7 +98,6 @@ sub explode2d(workobj)
       accel[vertex, 1] = 0
       accel[vertex, 2] = 0
     endif
-
   next
 endsub
 
@@ -118,7 +117,11 @@ sub explode3d(workobj)
     workobj.dest[vertex, 2] = workobj.dest[vertex, 2] + workobj.accel[vertex, 1] * real_time
     workobj.dest[vertex, 3] = workobj.dest[vertex, 3] + workobj.accel[vertex, 2] * real_time
     workobj.dest[vertex, 4] = workobj.dest[vertex, 4] + workobj.accel[vertex, 3] * real_time
-    ' we hit the ground - great!
+    
+  ' apply gravity 
+    workobj.accel[vertex, 2] = workobj.accel[vertex, 2] - (workobj.gravity * real_time)
+  
+  ' we hit the ground - great!
     if workobj.dest[vertex, 3] < workobj.ground
       workobj.dest[vertex,3] = workobj.ground
       workobj.accel[vertex, 1] = 0
@@ -126,8 +129,6 @@ sub explode3d(workobj)
       workobj.accel[vertex, 3] = 0
     endif
 
-    ' apply gravity 
-    workobj.accel[vertex, 2] = workobj.accel[vertex, 2] - (workobj.gravity * real_time)
   next
 endsub
 
