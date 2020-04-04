@@ -61,7 +61,11 @@ function break_apart_object(obj, d)
       next
       v = v + 2
     endif
-    lastv = { obj[j, 2], obj[j, 3] }
+    if d = 2
+      lastv = { obj[j, 2], obj[j, 3] }
+    else
+      lastv = { obj[j, 2], obj[j, 3], obj[j, 4] }
+    endif
   next
   return workobj
 endfunction
