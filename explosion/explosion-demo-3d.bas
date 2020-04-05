@@ -24,8 +24,8 @@ ce = prepare_explosion(3, cycle_object, world_scale, {0,0, 0}, {x_impulse, y_imp
 
 
 ' put it on the screen
-lc=LinesSprite(cycle_object)
-'call SpriteClip(f, {{-500, 500}, {500, -500}})
+lc=Lines3dSprite(ce.dest)
+call SpriteClip(lc, {{-500, 500}, {500, -500}})
 controls = WaitForFrame(JoystickNone, Controller1, JoystickNone)
 exploding = false
 while controls[1,3] = 0
