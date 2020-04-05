@@ -6,7 +6,7 @@ call ScaleSprite(32)
 call ReturnToOriginSprite()
 
 ' get the object
-cm =u{0,0,-40}
+cm ={0,0,-40}
 rm = {0,0,0}
 call cameraTranslate(cm)
 call ScaleSprite(64, 324 / 0.097)
