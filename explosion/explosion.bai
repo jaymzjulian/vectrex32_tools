@@ -85,7 +85,7 @@ sub explode2d(workobj)
   dest = workobj.dest
   accel = workobj.accel
   ground = workobj.ground
-  gravity = workobj.gravity
+  gravity = workobj.gravity * real_time
 
   ' accelerate the verticies
   for vertex = 1 to Ubound(dest)
@@ -94,7 +94,7 @@ sub explode2d(workobj)
     dest[vertex, 3] = dest[vertex, 3] + accel[vertex, 2] * real_time
 
     ' apply gravity 
-    accel[vertex, 2] = accel[vertex, 2] - (gravity * real_time)
+    accel[vertex, 2] = accel[vertex, 2] - gravity 
 
     ' we hit the ground - great!
     if dest[vertex, 3] < ground
@@ -116,21 +116,25 @@ sub explode3d(workobj)
   workobj.time = now
 
   ' accelerate the verticies
-  for vertex = 1 to Ubound(workobj.dest)
+  grav_inc = workobj.gravity * real_time
+  accel = workobj.accel
+  dest = workobj.dest
+  ground = workobj.ground
+  for vertex = 1 to Ubound(dest)
     ' shift according to acccel*time
-    workobj.dest[vertex, 2] = workobj.dest[vertex, 2] + workobj.accel[vertex, 1] * real_time
-    workobj.dest[vertex, 3] = workobj.dest[vertex, 3] + workobj.accel[vertex, 2] * real_time
-    workobj.dest[vertex, 4] = workobj.dest[vertex, 4] + workobj.accel[vertex, 3] * real_time
+    dest[vertex, 2] = dest[vertex, 2] + accel[vertex, 1] * real_time
+    dest[vertex, 3] = dest[vertex, 3] + accel[vertex, 2] * real_time
+    dest[vertex, 4] = dest[vertex, 4] + accel[vertex, 3] * real_time
     
   ' apply gravity 
-    workobj.accel[vertex, 2] = workobj.accel[vertex, 2] - (workobj.gravity * real_time)
+    accel[vertex, 2] = accel[vertex, 2] - grav_inc
   
   ' we hit the ground - great!
-    if workobj.dest[vertex, 3] < workobj.ground
-      workobj.dest[vertex,3] = workobj.ground
-      workobj.accel[vertex, 1] = 0
-      workobj.accel[vertex, 2] = 0
-      workobj.accel[vertex, 3] = 0
+    if dest[vertex, 3] < ground
+      dest[vertex,3] = ground
+      accel[vertex, 1] = 0
+      accel[vertex, 2] = 0
+      accel[vertex, 3] = 0
     endif
 
   next
